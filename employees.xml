@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<company>
+  <employees>
+    <employee id="EMP101">
+      <name>Sarah Connor</name>
+      <gender>Female</gender>
+      <department>Engineering</department>
+      <position>Lead Systems Architect</position>
+      <email>sarah.connor@example.com</email>
+      <salary>125000</salary>
+      <joiningDate>2021-03-15</joiningDate>
+      <status>Active</status>
+    </employee>
+    <employee id="EMP102">
+      <name>Michael Scott</name>
+      <gender>Male</gender>
+      <department>Sales</department>
+      <position>Regional Manager</position>
+      <email>m.scott@example.com</email>
+      <salary>95000</salary>
+      <joiningDate>2018-06-01</joiningDate>
+      <status>Active</status>
+    </employee>
+    <employee id="EMP103">
+      <name>Eleanor Vance</name>
+      <gender>Female</gender>
+      <department>Human Resources</department>
+      <position>HR Director</position>
+      <email>eleanor.v@example.com</email>
+      <salary>88000</salary>
+      <joiningDate>2020-01-10</joiningDate>
+      <status>Active</status>
+    </employee>
+    <employee id="EMP104">
+      <name>James Wilson</name>
+      <gender>Male</gender>
+      <department>Finance</department>
+      <position>Senior Financial Analyst</position>
+      <email>j.wilson@example.com</email>
+      <salary>92000</salary>
+      <joiningDate>2019-11-20</joiningDate>
+      <status>Active</status>
+    </employee>
+    <employee id="EMP105">
+      <name>Priya Sharma</name>
+      <gender>Female</gender>
+      <department>Engineering</department>
+      <position>Full Stack Developer</position>
+      <email>priya.sharma@example.com</email>
+      <salary>105000</salary>
+      <joiningDate>2022-07-04</joiningDate>
+      <status>Active</status>
+    </employee>
+    <employee id="EMP106">
+      <name>David Chen</name>
+      <gender>Male</gender>
+      <department>Design</department>
+      <position>UI/UX Product Designer</position>
+      <email>david.chen@example.com</email>
+      <salary>86000</salary>
+      <joiningDate>2023-02-14</joiningDate>
+      <status>Active</status>
+    </employee>
+    <employee id="EMP107">
+      <name>Amanda Brooks</name>
+      <gender>Female</gender>
+      <department>Marketing</department>
+      <position>Marketing Strategist</position>
+      <email>a.brooks@example.com</email>
+      <salary>79000</salary>
+      <joiningDate>2022-09-18</joiningDate>
+      <status>On Leave</status>
+    </employee>
+    <employee id="EMP108">
+      <name>Robert Taylor</name>
+      <gender>Male</gender>
+      <department>Engineering</department>
+      <position>DevOps Engineer</position>
+      <email>robert.t@example.com</email>
+      <salary>112000</salary>
+      <joiningDate>2021-10-05</joiningDate>
+      <status>Active</status>
+    </employee>
+  </employees>
+</company>

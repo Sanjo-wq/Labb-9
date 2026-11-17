@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Employee Directory | XML Data Viewer</title>
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --primary-light: #eff6ff;
+      --bg-body: #f8fafc;
+      --bg-card: #ffffff;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --border-color: #e2e8f0;
+      --success: #16a34a;
+      --success-bg: #dcfce7;
+      --warning: #d97706;
+      --warning-bg: #fef3c7;
+      --radius: 10px;
+      --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-body);
+      color: var(--text-main);
+      min-height: 100vh;
+      padding: 2.5rem 1.5rem;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    /* Header */
+    header {
+      margin-bottom: 2rem;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .title-group h1 {
+      font-size: 1.85rem;
+      font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .title-group p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      margin-top: 0.35rem;
+    }
+
+    .source-badge {
+      font-size: 0.75rem;
+      background: var(--primary-light);
+      color: var(--primary);
+      padding: 0.3rem 0.65rem;
+      border-radius: 9999px;
+      font-weight: 600;
+      border: 1px solid #bfdbfe;
+    }
+
+    /* Actions Bar & File Input */
+    .actions-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 1.5rem;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .btn-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      align-items: center;
+    }
+
+    button, .file-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.6rem 1.15rem;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s ease-in-out;
+      border: 1px solid transparent;
+      user-select: none;
+    }
+
+    .btn-primary {
+      background-color: var(--primary);
+      color: #ffffff;
+    }
+
+    .btn-primary:hover {
+      background-color: var(--primary-hover);
+    }
+
+    .btn-secondary {
+      background-color: #ffffff;
+      color: var(--text-main);
+      border-color: var(--border-color);
+    }
+
+    .btn-secondary:hover {
+      background-color: #f1f5f9;
+    }
+
+    input[type="file"] {
+      display: none;
+    }
+
+    /* Stats Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .stat-card {
+      background: var(--bg-card);
+      padding: 1.2rem;
+      border-radius: var(--radius);
+      border: 1px solid var(--border-color);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .stat-label {
+      font-size: 0.825rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-weight: 600;
+    }
+
+    .stat-value {
+      font-size: 1.65rem;
+      font-weight: 700;
+      margin-top: 0.35rem;
+      color: var(--text-main);
+    }
+
+    /* Filters Bar */
+    .filter-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius);
+      padding: 1rem 1.25rem;
+      margin-bottom: 1.25rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .search-input-wrap {
+      flex: 1;
+      min-width: 250px;
+      position: relative;
+    }
+
+    .search-input-wrap input, .filter-select {
+      width: 100%;
+      padding: 0.6rem 0.9rem;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .search-input-wrap input:focus, .filter-select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    }
+
+    .filter-select {
+      width: auto;
+      min-width: 170px;
+    }
+
+    /* Table Container */
+    .table-container {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.92rem;
+    }
+
+    thead th {
+      background-color: #f8fafc;
+      padding: 0.95rem 1rem;
+      font-weight: 600;
+      color: #475569;
+      border-bottom: 2px solid var(--border-color);
+      cursor: pointer;
+      user-select: none;
+      white-space: nowrap;
+    }
+
+    thead th:hover {
+      background-color: #edf2f7;
+    }
+
+    thead th .sort-icon {
+      font-size: 0.75rem;
+      margin-left: 0.3rem;
+      opacity: 0.5;
+    }
+
+    thead th.sorted .sort-icon {
+      opacity: 1;
+      color: var(--primary);
+    }
+
+    tbody tr {
+      border-bottom: 1px solid var(--border-color);
+      transition: background-color 0.12s ease-in-out;
+    }
+
+    tbody tr:last-child {
+      border-bottom: none;
+    }
+
+    tbody tr:hover {
+      background-color: #f8fafc;
+    }
+
+    td {
+      padding: 1rem;
+      color: var(--text-main);
+      vertical-align: middle;
+    }
+
+    .emp-id {
+      font-weight: 600;
+      font-family: monospace;
+      color: #1e293b;
+      background: #f1f5f9;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+    }
+
+    .emp-email {
+      color: var(--primary);
+      text-decoration: none;
+    }
+
+    .emp-email:hover {
+      text-decoration: underline;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 0.25rem 0.65rem;
+      border-radius: 9999px;
+      font-size: 0.775rem;
+      font-weight: 600;
+    }
+
+    .badge-active {
+      background-color: var(--success-bg);
+      color: var(--success);
+    }
+
+    .badge-leave {
+      background-color: var(--warning-bg);
+      color: var(--warning);
+    }
+
+    .badge-dept {
+      background-color: #f1f5f9;
+      color: #475569;
+      border: 1px solid #e2e8f0;
+    }
+
+    /* Status Banner / Messages */
+    .message-banner {
+      padding: 0.85rem 1.15rem;
+      border-radius: 8px;
+      margin-bottom: 1.25rem;
+      font-size: 0.9rem;
+      display: none;
+    }
+
+    .message-banner.error {
+      display: block;
+      background-color: #fef2f2;
+      color: #991b1b;
+      border: 1px solid #fecaca;
+    }
+
+    .message-banner.info {
+      display: block;
+      background-color: #eff6ff;
+      color: #1e40af;
+      border: 1px solid #bfdbfe;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 3.5rem 1rem;
+      color: var(--text-muted);
+    }
+
+    .empty-state svg {
+      width: 48px;
+      height: 48px;
+      margin-bottom: 0.75rem;
+      stroke: #94a3b8;
+    }
+
+    /* Footer info */
+    footer {
+      margin-top: 2rem;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <header>
+      <div class="title-group">
+        <h1>
+          <span>👥</span> Employee Information System
+          <span class="source-badge" id="sourceBadge">XML Reader</span>
+        </h1>
+        <p>Parses and renders structured employee records directly from an XML document into an interactive tabular view.</p>
+      </div>
+    </header>
+
+    <!-- Controls & Data Source Selection -->
+    <div class="actions-card">
+      <div class="btn-group">
+        <label for="xmlFileInput" class="file-label btn-primary">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+          </svg>
+          Upload XML File
+        </label>
+        <input type="file" id="xmlFileInput" accept=".xml,text/xml" />
+
+        <button type="button" class="btn-secondary" id="loadServerBtn">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+          Fetch employees.xml
+        </button>
+
+        <button type="button" class="btn-secondary" id="loadSampleBtn">
+          Load Built-in Sample
+        </button>
+      </div>
+
+      <div style="font-size: 0.85rem; color: var(--text-muted);" id="fileStatusText">
+        Ready to load data
+      </div>
+    </div>
+
+    <!-- Alert / Message Banner -->
+    <div id="messageBanner" class="message-banner"></div>
+
+    <!-- Statistical Highlights -->
+    <div class="stats-grid" id="statsGrid" style="display: none;">
+      <div class="stat-card">
+        <div class="stat-label">Total Staff</div>
+        <div class="stat-value" id="statTotalEmployees">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Departments</div>
+        <div class="stat-value" id="statDepartments">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Average Annual Salary</div>
+        <div class="stat-value" id="statAvgSalary">$0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Active Ratio</div>
+        <div class="stat-value" id="statActiveRatio">0%</div>
+      </div>
+    </div>
+
+    <!-- Filter & Search Controls -->
+    <div class="filter-card" id="filterCard" style="display: none;">
+      <div class="search-input-wrap">
+        <input type="text" id="searchInput" placeholder="Search by name, ID, position, or email..." />
+      </div>
+      <div>
+        <select id="departmentFilter" class="filter-select">
+          <option value="ALL">All Departments</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Table Container -->
+    <div class="table-container">
+      <table id="employeeTable">
+        <thead>
+          <tr>
+            <th data-column="id">ID <span class="sort-icon">▲▼</span></th>
+            <th data-column="name">Name <span class="sort-icon">▲▼</span></th>
+            <th data-column="gender">Gender <span class="sort-icon">▲▼</span></th>
+            <th data-column="department">Department <span class="sort-icon">▲▼</span></th>
+            <th data-column="position">Position <span class="sort-icon">▲▼</span></th>
+            <th data-column="email">Email <span class="sort-icon">▲▼</span></th>
+            <th data-column="salary">Salary <span class="sort-icon">▲▼</span></th>
+            <th data-column="joiningDate">Joining Date <span class="sort-icon">▲▼</span></th>
+            <th data-column="status">Status <span class="sort-icon">▲▼</span></th>
+          </tr>
+        </thead>
+        <tbody id="tableBody">
+          <!-- Rows injected dynamically -->
+        </tbody>
+      </table>
+
+      <!-- Empty State / Placeholder -->
+      <div id="emptyState" class="empty-state">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+        </svg>
+        <p>No XML data loaded yet. Click <strong>"Fetch employees.xml"</strong>, <strong>"Load Built-in Sample"</strong>, or upload a local XML file.</p>
+      </div>
+    </div>
+
+    <footer>
+      XML DOM Parser Demo &bull; Handles standard XML tags &bull; Real-time sorting & filtering
+    </footer>
+  </div>
+
+  <script>
+    // Embedded sample XML string so it works immediately under file:// protocol without CORS errors
+    const DEFAULT_SAMPLE_XML = `<?xml version="1.0" encoding="UTF-8"?>
+<company>
+  <employees>
+    <employee id="EMP101">
+      <name>Sarah Connor</name>
+      <gender>Female</gender>
+      <department>Engineering</department>
+      <position>Lead Systems Architect</position>
+      <email>sarah.connor@example.com</email>
+      <salary>125000</salary>
+      <joiningDate>2021-03-15</joiningDate>
+      <status>Active</status>
+    </employee>
+    <employee id="EMP102">
+      <name>Michael Scott</name>
+      <gender>Male</gender>
+      <department>Sales</department>
+      <position>Regional Manager</position>
+      <email>m.scott@example.com</email>
+      <salary>95000</salary>
+      <joiningDate>2018-06-01</joiningDate>
+      <status>Active</status>
+    </employee>
+    <employee id="EMP103">
+      <name>Eleanor Vance</name>
+      <gender>Female</gender>
+      <department>Human Resources</department>
+      <position>HR Director</position>
+      <email>eleanor.v@example.com</email>
+      <salary>88000</salary>
+      <joiningDate>2020-01-10</joiningDate>
+      <status>Active</status>
+    </employee>
+    <employee id="EMP104">
+      <name>James Wilson</name>
+      <gender>Male</gender>
+      <department>Finance</department>
+      <position>Senior Financial Analyst</position>
+      <email>j.wilson@example.com</email>
+      <salary>92000</salary>
+      <joiningDate>2019-11-20</joiningDate>
+      <status>Active</status>
+    </employee>
+    <employee id="EMP105">
+      <name>Priya Sharma</name>
+      <gender>Female</gender>
+      <department>Engineering</department>
+      <position>Full Stack Developer</position>
+      <email>priya.sharma@example.com</email>
+      <salary>105000</salary>
+      <joiningDate>2022-07-04</joiningDate>
+      <status>Active</status>
+    </employee>
+    <employee id="EMP106">
+      <name>David Chen</name>
+      <gender>Male</gender>
+      <department>Design</department>
+      <position>UI/UX Product Designer</position>
+      <email>david.chen@example.com</email>
+      <salary>86000</salary>
+      <joiningDate>2023-02-14</joiningDate>
+      <status>Active</status>
+    </employee>
+    <employee id="EMP107">
+      <name>Amanda Brooks</name>
+      <gender>Female</gender>
+      <department>Marketing</department>
+      <position>Marketing Strategist</position>
+      <email>a.brooks@example.com</email>
+      <salary>79000</salary>
+      <joiningDate>2022-09-18</joiningDate>
+      <status>On Leave</status>
+    </employee>
+    <employee id="EMP108">
+      <name>Robert Taylor</name>
+      <gender>Male</gender>
+      <department>Engineering</department>
+      <position>DevOps Engineer</position>
+      <email>robert.t@example.com</email>
+      <salary>112000</salary>
+      <joiningDate>2021-10-05</joiningDate>
+      <status>Active</status>
+    </employee>
+  </employees>
+</company>`;
+
+    let rawEmployeesData = [];
+    let currentSortColumn = null;
+    let currentSortAsc = true;
+
+    // Helper: Safely extract text content from an XML element or child tag
+    function getTagValue(parent, tagName, defaultValue = "N/A") {
+      const el = parent.getElementsByTagName(tagName)[0];
+      return el && el.textContent ? el.textContent.trim() : defaultValue;
+    }
+
+    // Parse XML string into JavaScript employee objects
+    function parseXML(xmlString) {
+      const parser = new DOMParser();
+      const xmlDoc = parser.parseFromString(xmlString, "application/xml");
+
+      // Check for XML parsing errors
+      const parseError = xmlDoc.getElementsByTagName("parsererror");
+      if (parseError.length > 0) {
+        throw new Error("Invalid XML: " + parseError[0].textContent);
+      }
+
+      const empNodes = xmlDoc.getElementsByTagName("employee");
+      if (empNodes.length === 0) {
+        throw new Error("No <employee> records found in the provided XML.");
+      }
+
+      const employees = [];
+      for (let i = 0; i < empNodes.length; i++) {
+        const node = empNodes[i];
+        
+        // ID can be an attribute or child tag
+        const idAttr = node.getAttribute("id");
+        const id = idAttr || getTagValue(node, "id", `EMP${i + 1}`);
+
+        const name = getTagValue(node, "name");
+        const gender = getTagValue(node, "gender", "Unspecified");
+        const department = getTagValue(node, "department", "General");
+        const position = getTagValue(node, "position", "Employee");
+        const email = getTagValue(node, "email", "-");
+        const rawSalary = parseFloat(getTagValue(node, "salary", "0")) || 0;
+        const joiningDate = getTagValue(node, "joiningDate", "-");
+        const status = getTagValue(node, "status", "Active");
+
+        employees.push({
+          id,
+          name,
+          gender,
+          department,
+          position,
+          email,
+          salary: rawSalary,
+          joiningDate,
+          status
+        });
+      }
+
+      return employees;
+    }
+
+    // Populate Department Filter options
+    function updateDepartmentOptions(employees) {
+      const deptSelect = document.getElementById("departmentFilter");
+      const currentSelected = deptSelect.value;
+      const departments = Array.from(new Set(employees.map(e => e.department))).sort();
+
+      deptSelect.innerHTML = `<option value="ALL">All Departments (${employees.length})</option>`;
+      departments.forEach(dept => {
+        const count = employees.filter(e => e.department === dept).length;
+        const opt = document.createElement("option");
+        opt.value = dept;
+        opt.textContent = `${dept} (${count})`;
+        deptSelect.appendChild(opt);
+      });
+
+      if (departments.includes(currentSelected)) {
+        deptSelect.value = currentSelected;
+      }
+    }
+
+    // Update Summary Statistics
+    function updateStats(employees) {
+      const statsGrid = document.getElementById("statsGrid");
+      const filterCard = document.getElementById("filterCard");
+
+      if (!employees || employees.length === 0) {
+        statsGrid.style.display = "none";
+        filterCard.style.display = "none";
+        return;
+      }
+
+      statsGrid.style.display = "grid";
+      filterCard.style.display = "flex";
+
+      const total = employees.length;
+      const departments = new Set(employees.map(e => e.department)).size;
+      const totalSalary = employees.reduce((sum, e) => sum + e.salary, 0);
+      const avgSalary = total > 0 ? totalSalary / total : 0;
+      const activeCount = employees.filter(e => e.status.toLowerCase() === "active").length;
+      const activePct = total > 0 ? Math.round((activeCount / total) * 100) : 0;
+
+      document.getElementById("statTotalEmployees").textContent = total;
+      document.getElementById("statDepartments").textContent = departments;
+      document.getElementById("statAvgSalary").textContent = "$" + avgSalary.toLocaleString(undefined, {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+      });
+      document.getElementById("statActiveRatio").textContent = `${activePct}%`;
+    }
+
+    // Format currency
+    function formatCurrency(amount) {
+      return "$" + amount.toLocaleString();
+    }
+
+    // Render Table Rows
+    function renderTable(employees) {
+      const tbody = document.getElementById("tableBody");
+      const emptyState = document.getElementById("emptyState");
+
+      tbody.innerHTML = "";
+
+      if (!employees || employees.length === 0) {
+        emptyState.style.display = "block";
+        emptyState.querySelector("p").textContent = "No matching records found.";
+        return;
+      }
+
+      emptyState.style.display = "none";
+
+      employees.forEach(emp => {
+        const tr = document.createElement("tr");
+
+        const statusClass = emp.status.toLowerCase() === "active" 
+          ? "badge-active" 
+          : "badge-leave";
+
+        tr.innerHTML = `
+          <td><span class="emp-id">${escapeHtml(emp.id)}</span></td>
+          <td><strong>${escapeHtml(emp.name)}</strong></td>
+          <td>${escapeHtml(emp.gender)}</td>
+          <td><span class="badge badge-dept">${escapeHtml(emp.department)}</span></td>
+          <td>${escapeHtml(emp.position)}</td>
+          <td><a class="emp-email" href="mailto:${escapeHtml(emp.email)}">${escapeHtml(emp.email)}</a></td>
+          <td style="font-weight: 600;">${formatCurrency(emp.salary)}</td>
+          <td>${escapeHtml(emp.joiningDate)}</td>
+          <td><span class="badge ${statusClass}">${escapeHtml(emp.status)}</span></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // Security sanitization helper
+    function escapeHtml(str) {
+      if (typeof str !== "string") return str;
+      return str
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    // Apply Filters (Search and Department)
+    function applyFilters() {
+      const searchTerm = document.getElementById("searchInput").value.toLowerCase().trim();
+      const selectedDept = document.getElementById("departmentFilter").value;
+
+      let filtered = rawEmployeesData.filter(emp => {
+        const matchesDept = selectedDept === "ALL" || emp.department === selectedDept;
+        const matchesSearch =
+          emp.id.toLowerCase().includes(searchTerm) ||
+          emp.name.toLowerCase().includes(searchTerm) ||
+          emp.position.toLowerCase().includes(searchTerm) ||
+          emp.email.toLowerCase().includes(searchTerm) ||
+          emp.department.toLowerCase().includes(searchTerm);
+
+        return matchesDept && matchesSearch;
+      });
+
+      if (currentSortColumn) {
+        filtered.sort((a, b) => {
+          let valA = a[currentSortColumn];
+          let valB = b[currentSortColumn];
+
+          if (typeof valA === "string") valA = valA.toLowerCase();
+          if (typeof valB === "string") valB = valB.toLowerCase();
+
+          if (valA < valB) return currentSortAsc ? -1 : 1;
+          if (valA > valB) return currentSortAsc ? 1 : -1;
+          return 0;
+        });
+      }
+
+      renderTable(filtered);
+    }
+
+    // Display banner message
+    function showBanner(message, type = "info") {
+      const banner = document.getElementById("messageBanner");
+      banner.className = `message-banner ${type}`;
+      banner.textContent = message;
+    }
+
+    function clearBanner() {
+      const banner = document.getElementById("messageBanner");
+      banner.style.display = "none";
+      banner.className = "message-banner";
+      banner.textContent = "";
+    }
+
+    // Process and load XML string into view
+    function loadAndDisplay(xmlString, sourceDescription) {
+      try {
+        clearBanner();
+        const employees = parseXML(xmlString);
+        rawEmployeesData = employees;
+
+        document.getElementById("fileStatusText").textContent = `Loaded ${employees.length} records (${sourceDescription})`;
+        document.getElementById("sourceBadge").textContent = sourceDescription;
+
+        updateDepartmentOptions(employees);
+        updateStats(employees);
+        applyFilters();
+      } catch (err) {
+        console.error(err);
+        showBanner(err.message, "error");
+        document.getElementById("fileStatusText").textContent = "Error parsing XML";
+      }
+    }
+
+    // 1. Load from User File Upload
+    document.getElementById("xmlFileInput").addEventListener("change", function (e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function (event) {
+        loadAndDisplay(event.target.result, file.name);
+      };
+      reader.onerror = function () {
+        showBanner("Failed to read the local file.", "error");
+      };
+      reader.readAsText(file);
+    });
+
+    // 2. Load Sample Data (Instant)
+    document.getElementById("loadSampleBtn").addEventListener("click", function () {
+      loadAndDisplay(DEFAULT_SAMPLE_XML, "Embedded Sample Data");
+    });
+
+    // 3. Fetch employees.xml via network/HTTP
+    document.getElementById("loadServerBtn").addEventListener("click", function () {
+      fetch("employees.xml")
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(`HTTP Error ${response.status}: Could not load employees.xml`);
+          }
+          return response.text();
+        })
+        .then(xmlText => {
+          loadAndDisplay(xmlText, "employees.xml (Fetched)");
+        })
+        .catch(err => {
+          // If running under file://, explain CORS clearly
+          if (window.location.protocol === "file:") {
+            showBanner(
+              "Note: Direct fetch() was blocked by your browser's local file security policy (CORS on file://). Loading built-in sample data instead. (Tip: Use 'Upload XML File' or run a local web server to fetch directly).",
+              "info"
+            );
+            loadAndDisplay(DEFAULT_SAMPLE_XML, "employees.xml (Sample Fallback)");
+          } else {
+            showBanner(err.message, "error");
+          }
+        });
+    });
+
+    // Setup Table Header Sorting
+    document.querySelectorAll("thead th[data-column]").forEach(th => {
+      th.addEventListener("click", () => {
+        const column = th.getAttribute("data-column");
+
+        if (currentSortColumn === column) {
+          currentSortAsc = !currentSortAsc;
+        } else {
+          currentSortColumn = column;
+          currentSortAsc = true;
+        }
+
+        // Update headers visual indicators
+        document.querySelectorAll("thead th").forEach(header => {
+          header.classList.remove("sorted");
+          const icon = header.querySelector(".sort-icon");
+          if (icon) icon.textContent = "▲▼";
+        });
+
+        th.classList.add("sorted");
+        th.querySelector(".sort-icon").textContent = currentSortAsc ? "▲" : "▼";
+
+        applyFilters();
+      });
+    });
+
+    // Filter event listeners
+    document.getElementById("searchInput").addEventListener("input", applyFilters);
+    document.getElementById("departmentFilter").addEventListener("change", applyFilters);
+
+    // Automatically load the sample data on initial startup
+    window.addEventListener("DOMContentLoaded", () => {
+      loadAndDisplay(DEFAULT_SAMPLE_XML, "Default XML Data");
+    });
+  </script>
+</body>
+</html>
